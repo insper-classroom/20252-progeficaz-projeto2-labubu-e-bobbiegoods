@@ -1,0 +1,4 @@
+Flask
+MySQL
+pytest
+requests
