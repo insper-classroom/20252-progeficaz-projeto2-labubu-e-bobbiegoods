@@ -36,8 +36,11 @@ def get_imoveis():
     if conn is None:
         resp = {"erro": "Erro ao conectar ao banco de dados"}
         return resp, 500
-    resp = {"conectou": "conectou ao banco de dados"}
-    return resp, 200
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM imoveis')
+    data = cursor.fetchall()
+
+    return data, 200
 
 if __name__ == '__main__':
     app.run(debug=True)

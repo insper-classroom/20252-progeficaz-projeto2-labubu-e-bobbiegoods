@@ -16,8 +16,30 @@ def test_get_imoveis(mock_connect_db, client):
     mock_cursor = MagicMock()
     mock_conn.cursor.return_value = mock_cursor
     
-    mock_cursor.fetchall.return_value = []
+    mock_cursor.fetchall.return_value = [{
+    "bairro": "Lake Danielle",
+    "cep": "85184",
+    "cidade": "Judymouth",
+    "data_aquisicao": "2017-07-29",
+    "id": 1,
+    "logradouro": "Nicole Common",
+    "tipo": "casa em condominio",
+    "tipo_logradouro": "Travessa",
+    "valor": 488424.0
+  }]
     mock_connect_db.return_value = mock_conn
-    response = client.get("/imoveis")
+    response = client.get("/")
 
-    assert response.status_code == 404
+    esperado = [{
+    "bairro": "Lake Danielle",
+    "cep": "85184",
+    "cidade": "Judymouth",
+    "data_aquisicao": "2017-07-29",
+    "id": 1,
+    "logradouro": "Nicole Common",
+    "tipo": "casa em condominio",
+    "tipo_logradouro": "Travessa",
+    "valor": 488424.0
+  }]
+    
+    assert response.get_json() == esperado
