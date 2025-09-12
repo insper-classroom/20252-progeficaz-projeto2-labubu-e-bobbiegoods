@@ -30,7 +30,7 @@ def connect_db():
 
 app = Flask(__name__)
 
-@app.route('/', methods=['GET'])
+@app.route('/imoveis', methods=['GET'])
 def get_imoveis():
     conn = connect_db()
     if conn is None:
@@ -39,6 +39,18 @@ def get_imoveis():
     cursor = conn.cursor(dictionary=True)
     cursor.execute('SELECT * FROM imoveis')
     data = cursor.fetchall()
+
+    return data, 200
+
+@app.route('/imoveis/<int:id>')
+def get_imovel_info(id):
+    conn = connect_db()
+    if conn is None:
+        resp = {"erro": "Erro ao conectar ao banco de dados"}
+        return resp, 500
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM imoveis WHERE id = %s', (id,))
+    data = cursor.fetchone()
 
     return data, 200
 
