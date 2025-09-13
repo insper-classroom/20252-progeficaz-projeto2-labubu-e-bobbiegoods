@@ -165,3 +165,44 @@ def test_info_imovel(mock_connect_db, client):
   }]
     
     assert response.get_json() == esperado
+@patch("api.connect_db")
+def test_criar_imovel(mock_connect_db, client):
+  mock_conn = MagicMock()
+  mock_cursor = MagicMock()
+  mock_conn.cursor.return_value = mock_cursor
+  mock_connect_db.return_value = mock_conn
+  novo_imovel = {
+        "bairro": "Vila Olimpia",
+        "cep": "04546-042",
+        "cidade": "São Paulo",
+        "data_aquisicao": "2000-01-01",
+
+        "logradouro": "Rua Quata",
+        "tipo": "casa",
+        "tipo_logradouro": "Rua",
+        "valor": 500000.0
+    
+}
+  response = client.post("/imoveis", json = novo_imovel)
+  # Verifica resposta HTTP
+  
+  
+  data = response.get_json()
+  
+
+  esperado = [{
+        "bairro": "Vila Olimpia",
+        "cep": "04546-042",
+        "cidade": "São Paulo",
+        "data_aquisicao": "2000-01-01",
+
+        "logradouro": "Rua Quata",
+        "tipo": "casa",
+        "tipo_logradouro": "Rua",
+        "valor": 500000.0
+  }]
+  
+  assert response.status_code == 201
+  assert data == esperado
+  mock_cursor.execute.assert_called_once()
+  mock_conn.commit.assert_called_once()
