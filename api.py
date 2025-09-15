@@ -53,6 +53,7 @@ def get_imovel_info(id):
     data = cursor.fetchone()
 
     return data, 200
+
 @app.route("/imoveis", methods= ["POST"])
 def criar_imovel():
     conn = connect_db()
@@ -60,26 +61,61 @@ def criar_imovel():
         resp = {"erro":"Nao foi possivel conectar com o banco de dados"}
         return resp, 400
     cursor = conn.cursor(dictionary=True)
+    data = request.get_json()
     cursor.execute("""
     INSERT INTO imoveis (
         bairro, cep, cidade, data_aquisicao, logradouro, tipo, tipo_logradouro, valor
     ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-""", (
-    "Vila Olimpia", "04546-042", "São Paulo", "2000-01-01",
-    "Rua Quata", "Casa", "Rua", 500000.00
-))
+""", (data['bairro'], data['cep'], data['cidade'], data['data_aquisicao'], data['logradouro'], data['tipo'], data['tipo_logradouro'], data['valor']))
     conn.commit()
-    resp = [{
-  "bairro": "Vila Olimpia",
-  "cep": "04546-042",
-  "cidade": "São Paulo",
-  "data_aquisicao": "2000-01-01",
-  "logradouro": "Rua Quata",
-  "tipo": "casa",
-  "tipo_logradouro": "Rua",
-  "valor": 500000.0
-}]
-    return resp, 201
+
+    return data, 201
+
+@app.route("/imoveis/<int:id>", methods=['PUT'])
+def atualizar_imovel(id):
+    conn = connect_db()
+    if conn is None:
+        resp = {"erro": "Erro ao conectar ao banco de dados"}
+        return resp, 500
+    cursor = conn.cursor(dictionary=True)
+
+    data = request.get_json()
+    cursor.execute("UPDATE imoveis SET bairro = %s, cep = %s, cidade = %s, data_aquisicao = %s, logradouro = %s, tipo = %s, tipo_logradouro = %s, valor = %s WHERE id = %s",
+                   (data['bairro'], data['cep'], data['cidade'], data['data_aquisicao'], data['logradouro'], data['tipo'], data['tipo_logradouro'], data['valor'], id,))
+    conn.commit()
+
+    cursor.execute('SELECT * FROM imoveis WHERE id = %s', (id,))
+    data = cursor.fetchone()
+
+    return data, 200
+
+@app.route("/imoveis/<int:id>", methods=['DELETE'])
+def apagar_imovel(id):
+    conn = connect_db()
+    if conn is None:
+        resp = {"erro": "Erro ao conectar ao banco de dados"}
+        return resp, 500
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("DELETE FROM imoveis WHERE id = %s", (id,))
+    conn.commit()
+    cursor.execute("SELECT * FROM imoveis")
+    data = cursor.fetchall()
+
+    return data, 200
+
+@app.route('/imoveis/<tipo>')
+def filtrar_imovel(tipo):
+    conn = connect_db()
+    if conn is None:
+        resp = {"erro": "Erro ao conectar ao banco de dados"}
+        return resp, 500
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM imoveis WHERE tipo = %s", (tipo,))
+    data = cursor.fetchall()
+
+    return data, 200
 
 if __name__ == '__main__':
     app.run(debug=True)
