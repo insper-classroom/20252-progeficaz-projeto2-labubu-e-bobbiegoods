@@ -117,6 +117,19 @@ def filtrar_imovel(tipo):
 
     return data, 200
 
+@app.route('/imoveis/<cidade>')
+def filtrar_por_cidade(cidade):
+    conn = connect_db()
+    if conn is None:
+        resp = {"erro": "Erro ao conectar ao banco de dados"}
+        return resp, 500
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM imoveis WHERE cidade = %s", (cidade,))
+    data = cursor.fetchall()
+
+    return data, 200
+
 if __name__ == '__main__':
     app.run(debug=True)
 

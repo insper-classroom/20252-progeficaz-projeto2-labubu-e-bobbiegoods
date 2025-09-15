@@ -361,3 +361,95 @@ def test_filtrar_imoveis(mock_connect_db, client):
   }]
     
     assert response.get_json() == esperado
+
+@patch("api.connect_db")
+def test_filtrar_por_cidade(mock_connect_db, client):
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
+
+    mock_cursor.return_value = [{
+    "bairro": "Lake Danielle",
+    "cep": "85184",
+    "cidade": "Judymouth",
+    "data_aquisicao": "2017-07-29",
+    "id": 1,
+    "logradouro": "Nicole Common",
+    "tipo": "casa em condominio",
+    "tipo_logradouro": "Travessa",
+    "valor": 488424.0
+  },
+  {
+    "bairro": "Colonton",
+    "cep": "93354",
+    "cidade": "North Garyville",
+    "data_aquisicao": "2021-11-30",
+    "id": 2,
+    "logradouro": "Price Prairie",
+    "tipo": "casa em condominio",
+    "tipo_logradouro": "Travessa",
+    "valor": 260070.0
+  },
+  {
+    "bairro": "West Jennashire",
+    "cep": "51116",
+    "cidade": "Katherinefurt",
+    "data_aquisicao": "2020-04-24",
+    "id": 3,
+    "logradouro": "Taylor Ranch",
+    "tipo": "apartamento",
+    "tipo_logradouro": "Avenida",
+    "valor": 815970.0
+  },
+  {
+    "bairro": "Reneeberg",
+    "cep": "01631",
+    "cidade": "Bentleymouth",
+    "data_aquisicao": "2014-11-03",
+    "id": 4,
+    "logradouro": "Stacey Isle",
+    "tipo": "terreno",
+    "tipo_logradouro": "Avenida",
+    "valor": 352507.0
+  },
+  {
+    "bairro": "Burkeview",
+    "cep": "09893",
+    "cidade": "Port Cynthia",
+    "data_aquisicao": "2023-05-10",
+    "id": 5,
+    "logradouro": "Taylor Causeway",
+    "tipo": "casa em condominio",
+    "tipo_logradouro": "Rua",
+    "valor": 929368.0
+  }]
+    
+    mock_connect_db.return_value = mock_conn
+
+    mock_cursor.fetchall.return_value = [{
+    "bairro": "West Jennashire",
+    "cep": "51116",
+    "cidade": "Katherinefurt",
+    "data_aquisicao": "2020-04-24",
+    "id": 3,
+    "logradouro": "Taylor Ranch",
+    "tipo": "apartamento",
+    "tipo_logradouro": "Avenida",
+    "valor": 815970.0
+  }]
+
+    response = client.get("/imoveis/Katherinefurt")
+
+    esperado = [{
+    "bairro": "West Jennashire",
+    "cep": "51116",
+    "cidade": "Katherinefurt",
+    "data_aquisicao": "2020-04-24",
+    "id": 3,
+    "logradouro": "Taylor Ranch",
+    "tipo": "apartamento",
+    "tipo_logradouro": "Avenida",
+    "valor": 815970.0
+  }]
+    
+    assert response.get_json() == esperado
