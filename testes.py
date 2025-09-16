@@ -391,7 +391,7 @@ def test_filtrar_imoveis(mock_connect_db, client):
     "valor": 815970.0
   }]
 
-    response = client.get("/imoveis/terreno")
+    response = client.get("/imoveis/tipo/terreno")
 
     esperado = [{
     "bairro": "West Jennashire",
@@ -488,7 +488,7 @@ def test_filtrar_por_cidade(mock_connect_db, client):
     "valor": 815970.0
   }]
 
-    response = client.get("/imoveis/Katherinefurt")
+    response = client.get("/imoveis/cidade/Katherinefurt")
 
     esperado = [{
     "bairro": "West Jennashire",
