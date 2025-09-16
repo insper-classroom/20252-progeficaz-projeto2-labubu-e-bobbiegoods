@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from api import app, connect_db
-
+from unittest.mock import ANY,call
 
 @pytest.fixture
 def client():
@@ -131,6 +131,12 @@ def test_get_imoveis(mock_connect_db, client):
   }]
     
     assert response.get_json() == esperado
+    mock_connect_db.assert_called_once()        
+    mock_conn.cursor.assert_called_once()       
+    mock_cursor.execute.assert_called_once()    
+    mock_cursor.fetchall.assert_called_once()   
+    mock_cursor.execute.assert_called_with("SELECT * FROM imoveis")
+
 
 @patch("api.connect_db")
 def test_info_imovel(mock_connect_db, client):
@@ -165,6 +171,11 @@ def test_info_imovel(mock_connect_db, client):
   }]
     
     assert response.get_json() == esperado
+    mock_connect_db.assert_called_once()        
+    mock_conn.cursor.assert_called_once()       
+    mock_cursor.execute.assert_called_once()    
+    mock_cursor.fetchone.assert_called_once()   
+    mock_cursor.execute.assert_called_with('SELECT * FROM imoveis WHERE id = %s', (ANY,))
 
 @patch("api.connect_db")
 def test_criar_imovel(mock_connect_db, client):
@@ -187,6 +198,14 @@ def test_criar_imovel(mock_connect_db, client):
     # Verifica resposta HTTP
     
     assert response.status_code == 201
+    mock_connect_db.assert_called_once()        
+    mock_conn.cursor.assert_called_once()       
+    mock_cursor.execute.assert_called_once()    
+    mock_cursor.execute.assert_called_with("""
+    INSERT INTO imoveis (
+        bairro, cep, cidade, data_aquisicao, logradouro, tipo, tipo_logradouro, valor
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+""", (ANY, ANY, ANY, ANY, ANY, ANY, ANY, ANY))
 
 @patch("api.connect_db")
 def test_atualizar_imovel(mock_connect_db, client):
@@ -201,7 +220,7 @@ def test_atualizar_imovel(mock_connect_db, client):
     "id": 1,
     "logradouro": "Rua X",
     "tipo": "casa em condominio",
-    "tipo_logradouro": "Travessa",
+    "tipo_logradouro": "Travessa",  
     "valor": 0.0
   }
     
@@ -224,7 +243,21 @@ def test_atualizar_imovel(mock_connect_db, client):
     response = client.put('/imoveis/1', json=atualizado)
 
     assert response.get_json() == atualizado
-    
+    mock_connect_db.assert_called_once()        
+    mock_conn.cursor.assert_called_once()       
+    mock_cursor.execute.assert_called()    
+    mock_cursor.fetchone.assert_called_once()   
+    mock_cursor.execute.assert_has_calls([
+    call(
+        "UPDATE imoveis SET bairro = %s, cep = %s, cidade = %s, data_aquisicao = %s, logradouro = %s, tipo = %s, tipo_logradouro = %s, valor = %s WHERE id = %s",
+        (ANY, ANY, ANY, ANY, ANY, ANY, ANY, ANY, ANY),
+    ),
+    call(
+        "SELECT * FROM imoveis WHERE id = %s",
+        (ANY,),
+    ),
+])
+
 @patch("api.connect_db")
 def test_deletar_imovel(mock_connect_db, client):
     mock_conn = MagicMock()
@@ -267,8 +300,20 @@ def test_deletar_imovel(mock_connect_db, client):
   }
 
     response = client.delete('/imoveis/1')
-
+    
     assert response.status_code == 200
+    mock_connect_db.assert_called_once()        
+    mock_conn.cursor.assert_called_once()       
+    mock_cursor.execute.assert_called()    
+    mock_cursor.fetchall.assert_called_once()
+    mock_cursor.execute.assert_has_calls([
+    call(
+       "DELETE FROM imoveis WHERE id = %s", (ANY,)
+    ),
+    call(
+        "SELECT * FROM imoveis"
+    ),
+])   
   
 @patch("api.connect_db")
 def test_filtrar_imoveis(mock_connect_db, client):
@@ -361,6 +406,11 @@ def test_filtrar_imoveis(mock_connect_db, client):
   }]
     
     assert response.get_json() == esperado
+    mock_connect_db.assert_called_once()        
+    mock_conn.cursor.assert_called_once()       
+    mock_cursor.execute.assert_called()    
+    mock_cursor.fetchall.assert_called_once()  
+    mock_cursor.execute.assert_called_with("SELECT * FROM imoveis WHERE tipo = %s", (ANY,))
 
 @patch("api.connect_db")
 def test_filtrar_por_cidade(mock_connect_db, client):
@@ -453,3 +503,8 @@ def test_filtrar_por_cidade(mock_connect_db, client):
   }]
     
     assert response.get_json() == esperado
+    mock_connect_db.assert_called_once()        
+    mock_conn.cursor.assert_called_once()       
+    mock_cursor.execute.assert_called()    
+    mock_cursor.fetchall.assert_called_once()  
+    mock_cursor.execute.assert_called_with("SELECT * FROM imoveis WHERE cidade = %s", (ANY,))

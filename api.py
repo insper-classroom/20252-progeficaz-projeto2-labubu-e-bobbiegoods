@@ -104,7 +104,7 @@ def apagar_imovel(id):
 
     return data, 200
 
-@app.route('/imoveis/<tipo>')
+@app.route('/imoveis/<tipo>', methods=["GET"])
 def filtrar_imovel(tipo):
     conn = connect_db()
     if conn is None:
@@ -117,7 +117,7 @@ def filtrar_imovel(tipo):
 
     return data, 200
 
-@app.route('/imoveis/<cidade>')
+@app.route('/imoveis/<cidade>', methods=["GET"])
 def filtrar_por_cidade(cidade):
     conn = connect_db()
     if conn is None:
